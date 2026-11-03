@@ -1,0 +1,7 @@
+.git
+infra/
+*.tfstate*
+__pycache__/
+.pytest_cache/
+exemples/
+docs/

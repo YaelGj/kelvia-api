@@ -1,0 +1,8 @@
+# Inventaire Ansible : les « VM » sont des conteneurs, joints par Docker (sans SSH).
+web:
+  hosts:
+    vm-web-1:
+    vm-web-2:
+  vars:
+    ansible_connection: community.docker.docker
+    ansible_python_interpreter: /usr/bin/python3

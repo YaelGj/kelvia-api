@@ -1,0 +1,8 @@
+- hosts: web   # groupe de l'inventaire
+  tasks:
+    - name: Mettre à jour le cache apt
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    # À compléter (TP 3) : installer nginx et déposer la page d'accueil.
