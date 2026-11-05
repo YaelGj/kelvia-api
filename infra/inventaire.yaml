@@ -1,8 +1,14 @@
 # Inventaire Ansible : les « VM » sont des conteneurs, joints par Docker (sans SSH).
-web:
-  hosts:
-    vm-web-1:
-    vm-web-2:
+# Deux groupes, deux environnements : leurs valeurs sont dans group_vars/recette.yml et group_vars/production.yml.
+all:
   vars:
     ansible_connection: community.docker.docker
-    ansible_python_interpreter: /usr/bin/python3
+    ansible_python_interpreter: /usr/local/bin/python3
+  children:
+    recette:
+      hosts:
+        vm-web-1:
+    production:
+      hosts:
+        vm-web-2:
+        # vm-web-3:

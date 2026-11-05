@@ -10,14 +10,14 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "Requêtes par seconde /salles",
+      "title": "Requêtes par seconde /billets",
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_requests_total{job=\"api\", handler=\"/salles\"}[1m]))",
+          "expr": "sum(rate(http_requests_total{job=\"api\", handler=\"/billets\"}[1m]))",
           "legendFormat": "requêtes par seconde"
         }
       ],
@@ -29,14 +29,14 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Latence 95e centile /salles",
+      "title": "Latence 95e centile /billets",
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"api\", handler=\"/salles\"}[1m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"api\", handler=\"/billets\"}[1m])))",
           "legendFormat": "95e centile"
         }
       ],

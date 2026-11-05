@@ -1,8 +1,8 @@
-- hosts: web   # groupe de l'inventaire
+# Configure la vitrine de chaque « VM » à partir du modèle vitrine.html.j2.
+# Les valeurs (environnement, couleur, maintenance) viennent de group_vars/.
+- hosts: all
   tasks:
-    - name: Mettre à jour le cache apt
-      ansible.builtin.apt:
-        update_cache: true
-        cache_valid_time: 3600
-
-    # À compléter (TP 3) : installer nginx et déposer la page d'accueil.
+    - name: Configurer la vitrine
+      ansible.builtin.template:
+        src: vitrine.html.j2
+        dest: /srv/index.html
