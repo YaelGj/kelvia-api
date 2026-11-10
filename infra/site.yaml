@@ -1,8 +1,9 @@
-# Configure la vitrine de chaque « VM » à partir du modèle vitrine.html.j2.
-# Les valeurs (environnement, couleur, maintenance) viennent de group_vars/.
 - hosts: all
   tasks:
-    - name: Configurer la vitrine
-      ansible.builtin.template:
-        src: vitrine.html.j2
+    - name: Écrire la page
+      ansible.builtin.copy:
         dest: /srv/index.html
+        content: >-
+          <h1>{{ environnement }}</h1>
+          {{ 'Maintenance en cours'
+             if maintenance else '' }}

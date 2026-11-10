@@ -1,114 +1,505 @@
 # Kelvia — billetterie en ligne de festivals
 
-> Cas fictif, exercice pédagogique. Module DevOps.
+> Cas fictif, exercice pédagogique.
 
-Kelvia est une entreprise fictive qui vend en ligne les billets de festivals de musique.
-Les développeurs livrent d'un côté, les administrateurs exploitent de l'autre, et chaque mise en production fait peur,
-surtout la veille d'une ouverture des ventes. Vous êtes la nouvelle équipe DevOps : ce dépôt est votre point de départ pour tous les TP.
+Kelvia vend en ligne les billets de festivals. Le jour de l'ouverture des ventes, le site est tombé et ce sont les festivaliers qui ont prévenu l'équipe.
+Vous êtes la nouvelle équipe DevOps : ce dépôt est votre point de départ pour tous les TP.
 
-**Consignes des TP : [TP.md](TP.md).**
+- `app/main.py` : l'API (page `/`, `/health`, `/billets`) ; `tests/` : les tests pytest.
+- `.devcontainer/` : l'environnement du codespace, décrit en code.
+- `infra/` : Terraform et Ansible (TP 3) ; `Dockerfile`, `compose.yaml`, `monitoring/`, `charge.sh` : TP 4.
+- `RENDU.md` : vos réponses (TP 1 et TP 4).
 
-## Contenu du dépôt
+Bloqué 5 minutes : ouvrez le bloc **Indice** ; 5 minutes de plus : le bloc **Solution**. Une erreur : [Erreurs fréquentes](#erreurs-fréquentes).
 
-| Chemin | Rôle |
+## Livrer : commit et push
+
+Un commit par livrable, avec le bouton **Source Control** (barre de gauche) : message, **Commit**, puis **Sync Changes**.
+Depuis le TP 2, `main` est protégée : passez par une branche et une pull request.
+
+<details><summary>Solution</summary>
+
+```bash
+git switch -c tp3                 # une branche par livrable (depuis le TP 2)
+git add -A
+git commit -m "TP 3 : inventaire"
+git push -u origin tp3            # puis, sur GitHub : Compare & pull request, Create, Merge
+git switch main && git pull       # revenir sur main à jour
+```
+</details>
+
+## TP 0 — Votre billetterie en ligne
+
+### 1. Ouvrir le codespace, lancer l'API, ouvrir le port 8000.
+
+```bash
+uvicorn app.main:app --reload
+```
+
+**Vous devez voir** : la page de billetterie.
+
+<details><summary>Indice</summary>
+
+Page du dépôt : **Code → Codespaces**. Le port 8000 est dans l'onglet **Ports**, à côté du terminal (icône globe).
+</details>
+
+<details><summary>Solution</summary>
+
+**Code → Codespaces → Create codespace on main** (ou ouvrir celui créé à J-2). Dans le terminal : `uvicorn app.main:app --reload`.
+Onglet **Ports** → ligne 8000 → **Open in Browser**. Laissez la visibilité du port à **Private**.
+</details>
+
+### 2. Changer le nom du festival dans app/main.py.
+
+**Vous devez voir** : le nouveau nom.
+
+<details><summary>Indice</summary>
+
+La variable `FESTIVAL`, en haut du fichier. Grâce à `--reload`, l'API redémarre seule : rechargez la page.
+</details>
+
+<details><summary>Solution</summary>
+
+```python
+FESTIVAL = "Festival de Mon Binôme"
+```
+Enregistrez (Ctrl+S), puis rechargez la page du port 8000.
+</details>
+
+### 3. Inviter votre binôme, activer la protection au push.
+
+**Vous devez voir** : la protection activée.
+
+<details><summary>Indice</summary>
+
+Tout est dans **Settings**, sur la page du dépôt.
+</details>
+
+<details><summary>Solution</summary>
+
+**Settings → Collaborators → Add people** : le compte GitHub de votre binôme.
+**Settings → Advanced Security** (ou **Code security**) **→ Push protection → Enable** : GitHub refusera un push qui contient un secret.
+</details>
+
+### 4. Commit et push avec le bouton Source Control.
+
+**Vous devez voir** : le commit sur GitHub.
+
+<details><summary>Indice</summary>
+
+Barre de gauche, icône des branches : message du commit, **Commit**, puis **Sync Changes**.
+</details>
+
+<details><summary>Solution</summary>
+
+```bash
+git commit -am "TP 0 : nom du festival"
+git push
+```
+Postez le lien de votre dépôt dans le chat.
+</details>
+
+## TP 1 — Étude de cas : diagnostic et rôles
+
+En binôme, dans `RENDU.md` (partie TP 1) du dépôt de l'un des deux. Données : slide « TP 1 · données : Kelvia, six derniers mois ».
+Remplacez seulement les `___`. Livrable : un commit de `RENDU.md`.
+
+### 1. Compléter les calculs des 4 métriques (slide « TP 1 · données : Kelvia, six derniers mois »).
+
+**Vous devez voir** : 4 valeurs chiffrées.
+
+<details><summary>Indice</summary>
+
+Écrivez le calcul, pas seulement le résultat. Lead time : du jour du commit au jour du déploiement. Change fail rate : déploiements en échec / déploiements.
+</details>
+
+<details><summary>Solution</summary>
+
+7 déploiements sur 6 mois, environ 1,2 par mois ; (26 + 19 + 12 + 5) / 4 = 15,5 jours ; 2 / 7, environ 29 % ; (5 + 9) / 2 = 7 h.
+</details>
+
+### 2. Relier 2 frictions des entretiens à un enjeu métier.
+
+**Vous devez voir** : 2 lignes complètes.
+
+<details><summary>Indice</summary>
+
+Pour chaque citation : qu'est-ce que l'entreprise perd ? Du temps (délai), de l'argent (coût), la confiance des clients (image).
+</details>
+
+<details><summary>Solution</summary>
+
+Marc : délai. Sofia : délai (ou coût). Thomas : image auprès des clients.
+</details>
+
+### 3. Un seul rôle responsable par tâche (liste dans RENDU.md).
+
+**Vous devez voir** : 8 responsables.
+
+<details><summary>Indice</summary>
+
+SysOps : serveurs, réseau, sauvegardes. DevOps : le chemin du code à la production. DevSecOps : la sécurité dans ce chemin.
+</details>
+
+<details><summary>Solution</summary>
+
+1 DevOps, 2 SysOps, 3 DevSecOps, 4 DevOps, 5 SysOps, 6 SysOps, 7 DevSecOps, 8 DevSecOps. Toute réponse argumentée avec un seul responsable est acceptée.
+</details>
+
+### 4. Un contrôle de sécurité et son moment dans le cycle.
+
+**Vous devez voir** : 1 ligne complète.
+
+<details><summary>Indice</summary>
+
+Le plus tôt possible dans le cycle, là où une correction coûte le moins cher (shift left).
+</details>
+
+<details><summary>Solution</summary>
+
+| Contrôle | Moment du cycle |
 |---|---|
-| `app/main.py` | L'API : page de billetterie `GET /`, `GET /health`, `GET /billets`, `POST /billets` |
-| `tests/` | Tests pytest de l'API |
-| `.devcontainer/` | L'environnement de travail, décrit en code |
-| `compose.yaml`, `monitoring/` | Prometheus et Grafana, avec le tableau de bord « Kelvia » |
-| `charge.sh` | Envoie du trafic sur `/billets` (TP 4) |
-| `infra/` | L'infrastructure de Kelvia en code : Terraform et Ansible (TP 3) |
-| `exemples/` | Exemples de livrables, sur un autre cas fictif (la pizzeria Nova) |
-| `docs/` | Vos captures d'écran |
+| analyse des dépendances (pip-audit) | à chaque pull request |
+</details>
 
-## Règle métier
+## TP 2 — Votre pipeline protège main
 
-Une commande compte de 1 à 4 billets. Cette règle est écrite dans la fonction `verifier_quantite` de `app/main.py`
-(limite : `QUANTITE_MAX`) : `POST /billets` avec une quantité hors de cet intervalle est refusé avec le code 422.
+### 1. Recopier ci.yml du README sur une branche, pull request, fusion.
 
-## Lancer le codespace
+Fichier `.github/workflows/ci.yml` :
 
-1. Sur la page du dépôt : **Code → Codespaces → Create codespace on main**.
-2. Attendre la fin de la création : `.devcontainer/post-create.sh` installe les dépendances Python,
-   Ansible et la collection `community.docker`.
-3. Dans le terminal, vérifier les outils :
-
-```bash
-docker version
-terraform version
-ansible --version
+```yaml
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+# moindre privilège pour le jeton
+permissions: {contents: read}
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: pytest
 ```
 
-Arrêtez votre codespace en fin de journée (**Code → Codespaces → … → Stop codespace**) : il consomme votre quota tant qu'il tourne.
+**Vous devez voir** : la pastille verte.
 
-## Commandes utiles
+<details><summary>Indice</summary>
+
+Créez la branche avec le nom de branche en bas à gauche de l'éditeur (**Create new branch**). Après le push, GitHub propose **Compare & pull request**.
+</details>
+
+<details><summary>Solution</summary>
 
 ```bash
-pytest                                       # lancer les tests
-uvicorn app.main:app --reload                # lancer l'API sur le port 8000
-docker compose up -d                         # démarrer les services de compose.yaml
-docker compose ps                            # état des services
-docker compose down                          # arrêter et supprimer les services
-./charge.sh                                  # environ 5 requêtes par seconde sur /billets (Ctrl+C pour arrêter)
-./charge.sh rush                             # ouverture des ventes : un pic de trafic d'une minute
+git switch -c ajout-ci
+mkdir -p .github/workflows       # puis créer ci.yml dans ce dossier, avec le contenu ci-dessus
+git add .github/workflows/ci.yml
+git commit -m "TP 2 : pipeline d'intégration continue"
+git push -u origin ajout-ci
+```
+Sur GitHub : **Compare & pull request → Create pull request**, attendre la pastille verte, **Merge pull request**. Puis `git switch main && git pull`.
+</details>
+
+### 2. Ajouter le badge d'état au README.
+
+Ligne à coller en haut du `README.md` (remplacez `<votre-compte>` par votre compte GitHub) :
+
+```markdown
+![ci](https://github.com/<votre-compte>/kelvia-api/actions/workflows/ci.yml/badge.svg)
 ```
 
-Infrastructure (depuis le dossier `infra/`) :
+**Vous devez voir** : le badge vert sur la page du dépôt.
+
+<details><summary>Indice</summary>
+
+Le badge affiche l'état du pipeline sur `main`. Commit et push, puis rechargez la page du dépôt.
+</details>
+
+<details><summary>Solution</summary>
+
+Collez la ligne sous le titre, enregistrez, puis :
+
+```bash
+git commit -am "TP 2 : badge d'état"
+git push
+```
+</details>
+
+### 3. Ruleset (slide « Protéger main avec un ruleset »), changer un prix, pull request.
+
+**Vous devez voir** : la fusion bloquée. Remettre le prix.
+
+<details><summary>Indice</summary>
+
+**Settings → Rules → Rulesets**. Le check à exiger est le nom du job : `tests`. Le test `test_prix_pass_1_jour` vérifie le prix du Pass 1 jour.
+</details>
+
+<details><summary>Solution</summary>
+
+1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset** ; cible : **Include default branch** ; cocher **Require a pull request before merging** (0 approbation) et **Require status checks to pass before merging**, ajouter `tests` ; **Enforcement status : Active** ; **Create**.
+2. Changer un prix :
+   ```bash
+   git switch -c prix                 # puis, dans app/main.py : "prix": 59 devient "prix": 65
+   git commit -am "Nouveau prix du Pass 1 jour"
+   git push -u origin prix
+   ```
+   Ouvrir la pull request : pastille rouge, **Merge** grisé.
+3. Remettre `59`, puis `git commit -am "Prix remis" && git push` : pastille verte, fusion.
+</details>
+
+## TP 3 — L'infrastructure de Kelvia en code
+
+Dans `infra/` : `main.tf` (Terraform), `inventaire.yaml` et `site.yaml` (Ansible). Livrable : un commit de `infra/inventaire.yaml`.
+
+### 1. Dans infra/ : terraform init, plan, apply.
 
 ```bash
 cd infra
 terraform init
-terraform plan
+terraform apply      # affiche le plan, puis répondez yes
+```
+
+**Vous devez voir** : deux pages, ports 8081 et 8082.
+
+<details><summary>Indice</summary>
+
+Lisez le plan avant de répondre `yes` : chaque `+` est une ressource créée. Les pages s'ouvrent dans l'onglet **Ports**, ou avec `curl localhost:8081`.
+</details>
+
+<details><summary>Solution</summary>
+
+Plan : `Plan: 4 to add, 0 to change, 0 to destroy.` (image, réseau, vm-web-1, vm-web-2). Les ports 8081 et 8082 affichent « Directory listing for / » : le dossier `/srv` est encore vide.
+</details>
+
+### 2. Lancer le playbook.
+
+```bash
+ansible-playbook -i inventaire.yaml site.yaml
+```
+
+**Vous devez voir** : RECETTE sur 8081, PRODUCTION sur 8082.
+
+<details><summary>Indice</summary>
+
+Lancez la commande depuis `infra/`. Rechargez les deux pages.
+</details>
+
+<details><summary>Solution</summary>
+
+`changed=1` pour vm-web-1 et vm-web-2. `curl localhost:8081` affiche `<h1>RECETTE</h1>`, `curl localhost:8082` affiche `<h1>PRODUCTION</h1>`.
+</details>
+
+### 3. maintenance: true pour la production (inventaire.yaml), relancer.
+
+**Vous devez voir** : seule la production en maintenance.
+
+<details><summary>Indice</summary>
+
+Une seule valeur change, dans le groupe `production`. Relancez le playbook.
+</details>
+
+<details><summary>Solution</summary>
+
+```yaml
+  vars: {environnement: PRODUCTION,
+         maintenance: true}
+```
+Puis `ansible-playbook -i inventaire.yaml site.yaml` : `changed=1` pour vm-web-2 seulement ; le port 8082 affiche « Maintenance en cours ».
+</details>
+
+### 4. Remettre false, tout relancer deux fois.
+
+```bash
 terraform apply
 ansible-playbook -i inventaire.yaml site.yaml
 ```
 
-Ports transférés par le codespace : 8000 (API), 3000 (Grafana), 9090 (Prometheus). Onglet **Ports** de l'éditeur.
+**Vous devez voir** : « No changes » et changed=0.
 
-## Livrables : format et emplacement
+<details><summary>Indice</summary>
 
-Consignes détaillées de chaque TP : `TP.md`. Un commit par étape livrée, sur `main` (par pull request à partir du TP 2).
+Le premier passage remet la page de production ; le second ne trouve plus rien à changer : c'est l'idempotence.
+</details>
 
-| TP | Livrable | Modèle de format |
-|---|---|---|
-| TP 1 | `DIAGNOSTIC.md` à la racine (dans le dépôt de l'un des deux) | `exemples/diagnostic-nova.md` |
-| TP 2 | `.github/workflows/ci.yml`, `.github/workflows/livraison.yml`, `CHANGELOG.md` : section v1.0.0 au-dessus de v0.1.0 | section v0.1.0 déjà présente ; modèle à trous de livraison.yml dans `TP.md` |
-| TP 3 | `IDEMPOTENCE.md` à la racine | `exemples/idempotence-nova.md` |
-| TP 4 | `SLO.md` et `CHAOS.md` à la racine ; tests dans `tests/` | `exemples/slo-nova.md`, `exemples/chaos-nova.md`, `tests/test_refus.py` |
-| TP 5 | `MIGRATION.md` à la racine (dans le dépôt de l'un des deux) | `exemples/migration-nova.md` |
+<details><summary>Solution</summary>
 
-Captures d'écran : dans `docs/`, nommées `tpN-sujet.png` (exemple : `docs/tp2-ruleset.png`).
+Remettez `maintenance: false`. Premier passage : `No changes.` pour Terraform, `changed=1` pour vm-web-2. Second passage : `No changes.` et `changed=0` partout.
+</details>
 
-Les fichiers de `exemples/` portent sur la pizzeria Nova : reprenez leur forme, pas leur contenu.
+## TP 4 — Partie 1 : conteneuriser l'API
 
-## Repartir d'un point de reprise
+Livrable : un commit de `compose.yaml`.
 
-Seulement quand le formateur vous le propose : il vous donne le nom du point de reprise, noté `<tag>` ci-dessous.
-Enregistrez d'abord votre travail en cours (commit), puis, dans le terminal du codespace :
+### 1. Lire le Dockerfile, décommenter le service api de compose.yaml, docker compose up -d.
 
-```
-git switch main
-git pull
-git switch -c rattrapage-<tag>
-git fetch https://github.com/YaelGj/kelvia-api <tag>
-git checkout FETCH_HEAD -- . ':!EQUIPE.md'
-git commit -m "Reprise <tag>"
-git push -u origin rattrapage-<tag>
+```bash
+docker compose up -d
+docker compose ps
 ```
 
-Ouvrez ensuite une pull request vers `main` et fusionnez quand le check `tests` est vert : depuis le TP 2, `main` n'accepte plus de push direct.
+**Vous devez voir** : api healthy.
 
-Ce que fait la reprise : les fichiers du point de reprise remplacent les vôtres ; vos fichiers qui n'y figurent pas sont conservés ; `EQUIPE.md` n'est jamais touché.
-**Vous devez voir** : la pull request au vert. Si `pytest` échoue, regardez d'abord vos propres fichiers de test conservés.
+<details><summary>Indice</summary>
 
-## Problèmes fréquents
+Arrêtez d'abord uvicorn (Ctrl+C) : il occupe le port 8000. Pour décommenter : sélectionnez les lignes du service `api`, puis Ctrl+/. La vérification de santé a lieu toutes les 10 s.
+</details>
 
-**Le port 8000 est déjà pris.** Un autre programme l'occupe encore : l'API lancée avec `uvicorn` au TP 0
-(Ctrl+C dans son terminal) ou un conteneur lancé à la main avec `docker run -p 8000:8000 …`
-(Ctrl+C dans son terminal, ou `docker ps` puis `docker stop <id>`). Libérez-le avant `docker compose up -d`.
+<details><summary>Solution</summary>
 
-**Visibilité des ports.** Laissez les ports en **Private** dans l'onglet Ports. Un port public exposerait
-Grafana à tout Internet. Pour montrer votre écran, utilisez le partage d'écran.
+```yaml
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment: {SERVIE_PAR: docker}
+    healthcheck:
+      test: >-
+        python -c "import urllib.request as u;
+        u.urlopen('http://localhost:8000/health')"
+      interval: 10s
+```
+`docker compose ps` : `Up … (healthy)` sur la ligne api (après « health: starting », 10 à 20 s).
+</details>
 
-**Première connexion à Grafana.** Port 3000, identifiant `admin`, mot de passe `admin`. Grafana propose ensuite
-de choisir un nouveau mot de passe. Le tableau de bord « Kelvia » est dans **Dashboards**.
+### 2. Ouvrir le port 8000.
+
+**Vous devez voir** : « Servie par un conteneur Docker ».
+
+<details><summary>Indice</summary>
+
+Onglet **Ports**, ligne 8000. La phrase s'affiche quand la variable `SERVIE_PAR` vaut `docker`.
+</details>
+
+<details><summary>Solution</summary>
+
+Onglet **Ports** → 8000 → **Open in Browser** (ou `curl localhost:8000`). La variable vient de `environment` dans `compose.yaml`.
+</details>
+
+### 3. Changer un texte de la page, docker compose up -d --build.
+
+```bash
+docker compose up -d --build
+```
+
+**Vous devez voir** : la modification.
+
+<details><summary>Indice</summary>
+
+Sans `--build`, l'ancienne image tourne toujours.
+</details>
+
+<details><summary>Solution</summary>
+
+Dans `app/main.py`, changez par exemple `FESTIVAL` ou la phrase « Billetterie Kelvia… », puis `docker compose up -d --build` et rechargez la page.
+</details>
+
+## TP 4 — Observer Kelvia, provoquer une panne
+
+Livrables : un commit pour l'instrumentation et `RENDU.md`, un commit pour le test des quantités.
+
+### 1. Décommenter l'instrumentation, up -d --build, Grafana, ./charge.sh puis ./charge.sh rush.
+
+```bash
+docker compose up -d --build
+./charge.sh          # Ctrl+C, puis ./charge.sh rush
+```
+
+**Vous devez voir** : les courbes monter.
+
+<details><summary>Indice</summary>
+
+Les deux lignes marquées « TP 4 » dans `app/main.py`. Grafana : port 3000, tableau de bord « Kelvia ». Les courbes se mettent à jour toutes les 5 s.
+</details>
+
+<details><summary>Solution</summary>
+
+```python
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app, latency_lowr_buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)).expose(app)
+```
+`curl -s localhost:8000/metrics | head` affiche des mesures. Sous `./charge.sh`, environ 5 requêtes par seconde ; sous `./charge.sh rush`, le trafic et la latence montent pendant 60 s.
+</details>
+
+### 2. Partie SLO (Service Level Objective) de RENDU.md.
+
+**Vous devez voir** : indicateur, cible, error budget.
+
+<details><summary>Indice</summary>
+
+Error budget = 100 % moins la cible, appliqué aux 43 200 minutes de 30 jours.
+</details>
+
+<details><summary>Solution</summary>
+
+Panneau « Latence 95e centile /billets » ; SLI sous 500 ms pendant 99,5 % du temps ; 0,5 % de 43 200 min = 216 min au-dessus de 500 ms ; budget épuisé : on fige les nouveautés et on fiabilise.
+</details>
+
+### 3. Compléter et renommer le test à trous (README), limite à 6.
+
+Fichier `tests/quantite_a_trous.py` :
+
+```bash
+git mv tests/quantite_a_trous.py tests/test_quantite.py
+pytest
+```
+
+**Vous devez voir** : le test rouge. Remettre 4.
+
+<details><summary>Indice</summary>
+
+Une quantité refusée est hors de 1 à 4. Code HTTP d'une donnée refusée : 422. Puis `QUANTITE_MAX = 6` dans `app/main.py` et relancez `pytest`.
+</details>
+
+<details><summary>Solution</summary>
+
+Trous : `verifier_quantite(5)`, `"quantite": 5`, `== 422`. `pytest` : vert. Avec `QUANTITE_MAX = 6`, 5 devient acceptée : `2 failed`. Remettez `QUANTITE_MAX = 4` : vert.
+</details>
+
+### 4. Partie chaos de RENDU.md, docker compose stop api 2 minutes, puis start.
+
+```bash
+docker compose stop api      # attendre 2 minutes
+docker compose start api
+```
+
+**Vous devez voir** : la panne, puis le retour.
+
+<details><summary>Indice</summary>
+
+Remplissez « Avant l'expérience » avant d'arrêter quoi que ce soit. Gardez `./charge.sh` dans un autre terminal et le tableau de bord ouvert.
+</details>
+
+<details><summary>Solution</summary>
+
+`./charge.sh` affiche `000` (pas de réponse) ; « API joignable » passe à 0 en une dizaine de secondes ; les panneaux de trafic et de latence montrent un trou. Après `start` : « API joignable » revient à 1, `200` revient.
+</details>
+
+## TP 5 — Atelier collectif : préparer la migration de Kelvia
+
+En classe, sans dépôt : une stratégie 7 R par composant, le service cloud de kelvia-api, un risque et sa mesure.
+
+## En avance ?
+
+- Ajoutez `pip install pip-audit` et `pip-audit -r requirements.txt` au pipeline.
+- Passez `nombre_vm` à 3 dans `infra/main.tf`, puis `terraform apply` : une troisième page.
+- Dans Grafana, une alerte sur « API joignable » à 0.
+
+## Erreurs fréquentes
+
+Copiez le message exact avant de demander de l'aide.
+
+| Message ou symptôme | Cause et correction |
+|---|---|
+| `push declined due to repository rule violations` | `main` est protégée depuis le TP 2 : passez par une branche et une pull request. |
+| `Interrupted: 1 error during collection` | `pytest.ini` a disparu de la racine : restaurez-le. |
+| `StarletteDeprecationWarning` | Un avertissement sans effet : les tests passent. |
+| Cible Prometheus en erreur (`no such host`), « API joignable » à 0 | Le service `api` est encore en commentaire dans `compose.yaml` (TP 4, partie 1). |
+| Panneaux de requêtes et de latence vides pendant l'arrêt de l'API | Normal : une API arrêtée n'envoie plus de mesures. Seul « API joignable » (et `charge.sh`) voit la panne. |
+| `port is already allocated` sur le port 8000 | Un conteneur ou uvicorn tourne encore : Ctrl+C, ou `docker ps` puis `docker stop`. |
+| `timeout while waiting for state to become 'removed'` | Une ressource remplacée (`-/+` dans le plan) est encore utilisée par une autre. |
+| `env: 'bash\r': No such file or directory` ou `detected dubious ownership` | Vous travaillez hors de Codespaces : repassez sur votre codespace. |

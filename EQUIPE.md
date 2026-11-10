@@ -1,6 +1,0 @@
-# Équipe
-
-Prénom : …
-Binôme : …
-
-<!-- Prénom seulement, jamais le nom de famille. -->

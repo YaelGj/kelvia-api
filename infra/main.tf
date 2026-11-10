@@ -1,30 +1,31 @@
+# Les « machines » sont des conteneurs Docker (pas de compte cloud) : les commandes sont les mêmes.
 terraform {
   required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "4.6.0"
-    }
+    docker = {source = "kreuzwerker/docker", version = "4.6.0"}
   }
 }
 
-# Le fournisseur docker pilote le démon Docker du codespace :
-# nos « VM » sont des conteneurs (substitut pédagogique d'un vrai cloud).
-provider "docker" {}
-
-# Nombre de « VM » web (prolongement du TP 3 : passer à 3).
 variable "nombre_vm" {
-  type    = number
   default = 2
 }
 
-# Image des « VM », construite à partir de vm/Dockerfile :
-# chaque « VM » sert le dossier /srv en HTTP sur son port interne 8000.
-resource "docker_image" "vm" {
-  name = "kelvia-vm"
-  build {
-    context = "${path.module}/vm"
+resource "docker_network" "kelvia" {
+  name = "kelvia"
+}
+resource "docker_image" "python" {
+  name = "python:3.12-slim"
+}
+resource "docker_container" "web" {
+  count   = var.nombre_vm
+  name    = "vm-web-${count.index + 1}"
+  image   = docker_image.python.image_id
+  command = ["python", "-m", "http.server",
+             "8000", "-d", "/srv"]
+  networks_advanced {
+    name = docker_network.kelvia.name
+  }
+  ports {
+    internal = 8000
+    external = 8081 + count.index
   }
 }
-
-# À compléter (TP 3) : le réseau kelvia et les « VM » vm-web-1, vm-web-2…
-# (slide « Une ressource Terraform »).
